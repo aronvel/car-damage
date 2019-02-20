@@ -229,9 +229,16 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
         # Read image
         image = skimage.io.imread(args.image)
         # Detect objects
-        r = model.detect([image], verbose=1)[0]
+        re = model.detect([image], verbose=1)[0]
         # Color splash
-        splash = color_splash(image, r['masks'])
+        splash = color_splash(image, re['masks'])
+        results = model.detect([image], verbose=1)
+        ax=get_ax(1)
+        r=results[0]
+        visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'],dataset.class_names, r['scores'], ax=ax,title="Predictions")
+        log("gt_class_id", gt_class_id)
+        log("gt_bbox", gt_bbox)
+        log("gt_mask", gt_mask)
         # Save output
         file_name = "splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
         skimage.io.imsave(file_name, splash)
