@@ -7,12 +7,12 @@ from fpdf import FPDF
 
 import base64
 import json
-from openalpr import Alpr
+#from openalpr import Alpr
 cbody_type=""
 ccolor=""
 cmake=""
 cmodel=""
-cplate=""
+cplate="TN09BF2571"
 con=float()
 conplate=float()
 l=0
@@ -27,10 +27,7 @@ def globally_change(body_type,color,make,model,confi):
 	cmodel=model
 	global con
 	con=confi
-	print(cbody_type)
-	print(ccolor)
-	print(cplate)
-	print(con)
+	
 def globally_change_plate(plate):
 	global cplate
 	cplate=plate
@@ -47,6 +44,7 @@ def globally_change_plate(plate):
       count = count + 1
 	 '''
 def detect_plate(path_file):
+	'''
 	alpr = Alpr("in", "/usr/share/openalpr/config/openalpr.defaults.conf", "/usr/share/openalpr/runtime_data")
 	if not alpr.is_loaded():
 		 print("Error loading OpenALPR")
@@ -75,15 +73,16 @@ def detect_plate(path_file):
 	else:
 		#print(results)
 		platei=results['results'][0]['candidates'][0]['plate']
-		print(platei)
+		#print(platei)
 		platec=results['results'][0]['candidates'][0]['confidence']
 		if l==0:
 			conplate=platec
 		if conplate<=platec:
 			globally_change_plate(platei)
+	'''
 	SECRET_KEY = 'sk_1e93017a3c2a2aadbdd76754'
 
-	with open(IMAGE_PATH, 'rb') as image_file:
+	with open(path_file, 'rb') as image_file:
 		img_base64 = base64.b64encode(image_file.read())
 
 	url = 'https://api.openalpr.com/v2/recognize_bytes?recognize_vehicle=1&country=in&secret_key=%s' % (SECRET_KEY)
@@ -97,17 +96,13 @@ def detect_plate(path_file):
 	color=re["results"][0]["vehicle"]["color"][0]["name"]
 	model=re["results"][0]["vehicle"]["make_model"][0]["name"]
 	confi=re["results"][0]["vehicle"]["make_model"][0]["confidence"]
-	print(confi)
+	#print(confi)
 	print("\n")
 	if l==0:
 		con=confi
 	if con<=confi:
 		globally_change(body_type,color,make,model,confi)
-	print(cmake)
-	print("\n")
-	print(cmodel)
-	print("\n")
-	alpr.unload()
+	#alpr.unload()
 		
 if __name__=="__main__":
 	'''a = argparse.ArgumentParser()
@@ -115,15 +110,12 @@ if __name__=="__main__":
 	a.add_argument("--pathOut", help="path to images")
 	args = a.parse_args()
 	extractImages(args.pathIn, args.pathOut)'''
-	path="ford"
-	for name in os.listdir(path)[:3]:
-		filename="ford/"+name
-		detect_plate(filename)
-	print("body type	:",cbody_type)
-	print("make		:",cmake)
-	print("color		:",ccolor)
-	print("model		:",cmodel)
-	print("plate		:",cplate)
+	path="test"
+	
+	filename="test/frame0.jpg"
+	detect_plate(filename)
+	filename="test/frame1.jpg"
+	detect_plate(filename)
 	pdf = FPDF()
 	pdf.set_margins(40,40,40)
 	pdf.add_page()
@@ -139,7 +131,7 @@ if __name__=="__main__":
 	pdf.cell(10, 20, 'Arunasalam', 0, 2, 'R')
 	pdf.add_page()
 	pdf.write(5, 'The captured image is \n ')
-	pdf.image('./ford/frame0.jpg', x = 10, y = 90)
+	pdf.image('./test/frame0.jpg', x = 10, y = 90, w=150, h=84)
 	pdf.add_page()
 	pdf.cell(100, 20, 'The body type of the car is :'+cbody_type, 0, 2, 'L')
 	pdf.cell(100, 20, 'The car company is :'+cmake, 0, 2, 'L')
@@ -147,7 +139,13 @@ if __name__=="__main__":
 	pdf.cell(100, 30, 'The model of the car is :'+cmodel, 0, 2, 'L')
 	pdf.write(5, 'The license plate is %s ' %cplate) # with confidence of %s
 	pdf.add_page()
-	for name in os.listdir('polo'):
-		filename="output/"+name
-		pdf.image(filename, x = 10, y = 90, w=150, h=84)
-	pdf.output('report.pdf', 'F')
+	pdf.write(5, 'The scratch detected at \n ')
+	c=0
+	for name in os.listdir('output'):
+		if name.endswith("jpg"):
+			c=1
+			filename='output/'+name
+			pdf.image(filename, x = 10, y = 90, w=150, h=84)
+	if c==0:
+		pdf.cell(100, 20, 'No scratch detected in this car', 0, 2, 'R')
+	pdf.output('polo report.pdf', 'F')
