@@ -148,4 +148,4 @@ if __name__=="__main__":
 			pdf.image(filename, x = 10, y = 90, w=150, h=84)
 	if c==0:
 		pdf.cell(100, 20, 'No scratch detected in this car', 0, 2, 'R')
-	pdf.output('polo report.pdf', 'F')
+	pdf.output('ford report.pdf', 'F')
