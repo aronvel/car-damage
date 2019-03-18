@@ -140,8 +140,12 @@ if __name__=="__main__":
 	pdf.write(5, 'The license plate is %s ' %cplate) # with confidence of %s
 	pdf.add_page()
 	pdf.write(5, 'The scratch detected at \n ')
+	c=0
 	for name in os.listdir('output'):
 		if name.endswith("jpg"):
+			c=1
 			filename='output/'+name
 			pdf.image(filename, x = 10, y = 90, w=150, h=84)
+	if c==0:
+		pdf.cell(100, 20, 'No scratch detected in this car', 0, 2, 'R')
 	pdf.output('polo report.pdf', 'F')
